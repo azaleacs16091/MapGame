@@ -95,6 +95,8 @@ public class MoveChara {
             return false;
         } else if (mapData.getMap(posX+dx, posY+dy) == MapData.TYPE_NONE){
             return true;
+        } else if (mapData.getMap(posX+dx, posY+dy) == MapData.TYPE_ITEM){
+            return true;
         }
         return false;
     }
@@ -110,9 +112,10 @@ public class MoveChara {
         if (canMove(dx,dy)){
             posX += dx;
             posY += dy;
-            /*if(mapData.reachGoal(posX,posY) == true){
-                System.out.println("Game Clear !!");
-            }*/
+            if(mapData.getMap(posX,posY) == MapData.TYPE_ITEM){
+                mapData.setMap(posX,posY,MapData.TYPE_NONE);
+                //picUpItem(posX,posY);
+            }
             return true;
         }else {
             if(mapData.reachGoal(posX+dx,posY+dy) == true){
@@ -131,6 +134,10 @@ public class MoveChara {
     public Image getImage(){
         changeCount();
         return charaImage[getIndex()];
+    }
+
+    public void picUpItem(int itemPosX, int itemPosY){
+
     }
 }
 

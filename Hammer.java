@@ -1,4 +1,4 @@
-public class Hammer extends ItemObjects{
+public class Hammer{
     private int posX;
     private int posY;
 

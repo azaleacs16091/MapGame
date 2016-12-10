@@ -1,9 +1,10 @@
 import javafx.scene.image.Image;
 public class ItemObjects{
-    public static final int TYPE_HAMMER    = 0;
-    public static final int TYPE_RED_STONE = 1;
-   // public static final int TYPE_STAMP     = 2;
+    public static final int ITEM_HAMMER    = 0;
+    public static final int ITEM_RED_STONE = 1;
+   // public static final int ITEM_STAMP     = 2;
     private MapData mapData;
+    private MoveChara chara;
     public Hammer[] hammers;
     //public Word[] keyWord;
     private Image[] itemImage;
@@ -14,13 +15,13 @@ public class ItemObjects{
     
     ItemObjects(MapData mapData){
         this.mapData = mapData;
+        this.chara = chara;
         itemImage = new Image[1];
-
-        itemImage[TYPE_HAMMER] = new Image("image/HAMMER.png");
-        //itemImage[TYPE_RED_STONE] = new Image("RED_OBJECT");
-        //itemImage[TYPE_STAMP] = new Image("STAMP.png");
-        putItem(TYPE_HAMMER,2);
-
+        itemImage[ITEM_HAMMER] = new Image("image/HAMMER.png");
+        //itemImage[ITEM_RED_STONE] = new Image("RED_OBJECT");
+        //itemImage[ITEM_STAMP] = new Image("STAMP.png");
+        putItem(ITEM_HAMMER,2);
+        System.out.println("ItemObjects OK");
     }
 
     //getImageメソッド
@@ -31,81 +32,70 @@ public class ItemObjects{
         return itemImage[itemID];
     }
 
-    //canPutItemメソッド
+    //itemが置けるのは3(TYPE_ITEM)の場所だけ
+    //noItemAtメソッド
     //paramter 
-    //  候補点
+    //  アイテム座標
     //return
-    //  候補点にアイテムを置けるならtrueを返す
+    //  その座標に他のアイテムが置かれてなければtrueを返す
     //  
-    public boolean canPutItem(int posX, int posY){
-        boolean canPut_f = false; 
-        if (mapData.getMap(posX, posY) == MapData.TYPE_WALL){
-            return false;
-        } else if (mapData.getMap(posX, posY) == MapData.TYPE_NONE){
-            return true;
-        } else if (mapData.getMap(posX, posY) == MapData.TYPE_STONE){
-            //wordの場合を除く処理を作る
-            //return false;
-        }else{
-            for(Hammer h: hammers){
-                if(h != null){
-                    if(h.getPosX() == posX && h.getPosY() == posY){
-                        return false;
-                    }else{
-                        canPut_f = true;
-                    }
+    public boolean noItemAt(int posX, int posY){
+        boolean can_put_f = false;
+        for(Hammer h: hammers){
+            if(h != null){
+                if(h.getPosX() == posX && h.getPosY() == posY){
+                    return false;
                 }else{
-                    canPut_f = true;
-                    break;
+                    can_put_f = true;
                 }
-            }  
-            /*
-            for(Word w: keyWord){
-                if(w!=null){
-                    if(w.getPosX() == posX && w.getPosY() == posY){
-                        return false;
-                    }else{
-                        canPut_f = true;
-                    }
+            }else{
+                can_put_f = true;
+                break;
+            }
+        }  
+        /*
+        for(Word w: keyWord){
+            if(w!=null){
+                if(w.getPosX() == posX && w.getPosY() == posY){
+                    return false;
                 }else{
-                    canPut_f = true;
-                    break;
+                    can_put_f = true;
                 }
-            }  
-            */
-
-            return canPut_f;
-        }
-        return false;
+            }else{
+                can_put_f = true;
+                break;
+            }
+        }  
+        */
+        return can_put_f;
     }
 
     //putItemメソッド
     //parameter 
     //  int itemType : アイテムの種類
     //  int itemNum  : アイテムの個数
-    //return  
-    //  --
     //
-    public void putItem(int itemType, int itemNum){
+    public void putItem(int itemType, int thisItemNum){
         int x,y;
         int cnt = 0;
 
-        if(itemType == TYPE_HAMMER){
-            hammers = new Hammer[itemNum];
-        }else if(itemType == TYPE_RED_STONE){
+        if(itemType == ITEM_HAMMER){
+            hammers = new Hammer[thisItemNum];
+        }else if(itemType == ITEM_RED_STONE){
 
         }else{
 
         }
 
-        while(cnt < itemNum){
-            x = (int)(Math.random()*mapData.getWidth());
-            y = (int)(Math.random()*mapData.getHeight());
-            if(canPutItem(x,y)){
+        while(cnt < thisItemNum){
+            mapData.choseItemPos();
+            x = mapData.getItemPosX();
+            y = mapData.getItemPosY();
+            if(noItemAt(x,y)){
                 switch(itemType){
                     case 0: //Hammer
                         hammers[cnt] = new Hammer(x,y);
-                        System.out.println("Hammer created");
+                        System.out.println("Hammer created "+hammers[cnt].getPosX()+","+hammers[cnt].getPosY());
                         break;
                     case 1: //足跡つかないグッズ
                         break;

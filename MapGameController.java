@@ -19,7 +19,8 @@ public class MapGameController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        mapData = new MapData(21,15);
+        //mapData = new MapData(21,15);
+        mapData = new MapData(31,25);
         chara = new MoveChara(1,1,mapData);
         items = new ItemObjects(mapData);
         mapImageView = new ImageView[mapData.getHeight()*mapData.getWidth()];
@@ -34,51 +35,38 @@ public class MapGameController implements Initializable {
         mapPrint(chara, mapData,items);
     }
 
-    //test
+    //mapPrintメソッド
+    //parameter
+    //  MoveChara c   : 操作するキャラクター
+    //  MapData m     : マップデータ
+    //  ItemObjects i : アイテム 
+    //
+    //アーキテクチャに従って実際にイメージを貼っていく
+    //
     public void mapPrint(MoveChara c, MapData m, ItemObjects i){
         for(int y=0; y<mapData.getHeight(); y++){
             for(int x=0; x<mapData.getWidth(); x++){
                 int index = y*mapData.getWidth() + x;
                 if (x==c.getPosX() && y==c.getPosY()){
-                    //ImageViewのindex番目のimageとしてMoveChara.getImageをセットする
-                    //ImageViewクラスのsetImageでimage(キャラクター)をセットする
                     mapImageView[index].setImage(c.getImage());
-                }else if(x == i.hammers[0].getPosX()  &&  y == i.hammers[0].getPosY()){
-                    System.out.println(x+","+y);
-                    mapImageView[index].setImage(i.getImage(i.TYPE_HAMMER));
-                }else if(x == i.hammers[1].getPosX()  &&  y == i.hammers[1].getPosY()){
-                    System.out.println(x+","+y);
-                    mapImageView[index].setImage(i.getImage(i.TYPE_HAMMER));
-                }else {
-                    //ImageViewのindex番目のimageとしてMapData.getImageをセットする
-                    //ImageViewクラスのsetImageでimage(マップアーキテクチャ)をセットする
-                    mapImageView[index].setImage(m.getImage(x,y));
+                }else if(Math.abs(x-c.getPosX()) > 3 || Math.abs(y-c.getPosY()) > 3) {
+                    mapImageView[index].setImage(c.getImage());
+                }else{
+                    if(mapData.getMap(x,y) != mapData.TYPE_ITEM){
+                        mapImageView[index].setImage(m.getImage(x,y));
+                    }else{
+                        if(x==i.hammers[0].getPosX() && y==i.hammers[0].getPosY()){
+                            mapImageView[index].setImage(i.getImage(i.ITEM_HAMMER));
+                        }else if(x==i.hammers[1].getPosX() && y==i.hammers[1].getPosY()){
+                            mapImageView[index].setImage(i.getImage(i.ITEM_HAMMER));
+                        }else{
+                            mapImageView[index].setImage(m.mapImage[MapData.TYPE_NONE]);
+                        }
+                    }
                 }
             }
         }
-
     }
-    /*
-    public void mapPrint(MoveChara c, MapData m){
-        for(int y=0; y<mapData.getHeight(); y++){
-            for(int x=0; x<mapData.getWidth(); x++){
-                int index = y*mapData.getWidth() + x;
-                if (x==c.getPosX() && y==c.getPosY()){
-                    //ImageViewのindex番目のimageとしてMoveChara.getImageをセットする
-                    //ImageViewクラスのsetImageでimageをセットする
-                    mapImageView[index].setImage(c.getImage());
-                }else if(){
-
-                }else {
-                    //ImageViewのindex番目のimageとしてMapData.getImageをセットする
-                    //ImageViewクラスのsetImageでimageをセットする
-                    mapImageView[index].setImage(m.getImage(x,y));
-                }
-            }
-        }
-
-    }
-    */
 
     //リセットボタン
     public void func1ButtonAction(ActionEvent event) { 
