@@ -15,6 +15,7 @@ public class MoveCaw implements UpdateEvent, Cloneable
   public static final int TYPE_LEFT  = 1;
   public static final int TYPE_RIGHT = 2;
   public static final int TYPE_UP    = 3;
+  public static final int TYPE_OUT   = 4;
 
   private int posX;
   private int posY;
@@ -50,20 +51,23 @@ public class MoveCaw implements UpdateEvent, Cloneable
     this.log = new int[mapData.getWidth() * mapData.getHeight()];
     Arrays.fill(log, -13333);
 
-    charaImage = new Image[12];
-    charaImage[0 * 3 + 0] = new Image("image/nekod1.png");
-    charaImage[0 * 3 + 1] = new Image("image/nekod2.png");
-    charaImage[0 * 3 + 2] = new Image("image/nekod3.png");
-    charaImage[1 * 3 + 0] = new Image("image/nekol1.png");
-    charaImage[1 * 3 + 1] = new Image("image/nekol2.png");
-    charaImage[1 * 3 + 2] = new Image("image/nekol3.png");
-    charaImage[2 * 3 + 0] = new Image("image/nekor1.png");
-    charaImage[2 * 3 + 1] = new Image("image/nekor2.png");
-    charaImage[2 * 3 + 2] = new Image("image/nekor3.png");
-    charaImage[3 * 3 + 0] = new Image("image/nekou1.png");
-    charaImage[3 * 3 + 1] = new Image("image/nekou2.png");
-    charaImage[3 * 3 + 2] = new Image("image/nekou3.png");
-
+    charaImage = new Image[16];
+    charaImage[0 * 3 + 0] = new Image("image/ushid1.png");
+    charaImage[0 * 3 + 1] = new Image("image/ushid2.png");
+    charaImage[0 * 3 + 2] = new Image("image/ushid1.png");
+    charaImage[1 * 3 + 0] = new Image("image/ushil1.png");
+    charaImage[1 * 3 + 1] = new Image("image/ushil2.png");
+    charaImage[1 * 3 + 2] = new Image("image/ushil1.png");
+    charaImage[2 * 3 + 0] = new Image("image/ushir1.png");
+    charaImage[2 * 3 + 1] = new Image("image/ushir2.png");
+    charaImage[2 * 3 + 2] = new Image("image/ushir1.png");
+    charaImage[3 * 3 + 0] = new Image("image/ushiu.png");
+    charaImage[3 * 3 + 1] = new Image("image/ushiu.png");
+    charaImage[3 * 3 + 2] = new Image("image/ushiu.png");
+    charaImage[4 * 3 + 0] = new Image("image/ushiout.png");
+    charaImage[4 * 3 + 1] = new Image("image/ushiout.png");
+    charaImage[4 * 3 + 2] = new Image("image/ushiout.png");
+    
     setCaw();
     
     execute = false;
@@ -134,7 +138,6 @@ public class MoveCaw implements UpdateEvent, Cloneable
 
   public void start()
   {
-    System.out.println("foo");
     execute = true;
     new AIWorker(300).execute();
   }
@@ -276,6 +279,7 @@ public class MoveCaw implements UpdateEvent, Cloneable
     @Override
     protected void done()
     {
+      isstoped = false;
       // ここでAIの動きを決定する
       Vector< Integer > StartIdxHeavy = new Vector< Integer >();
       if(mapData.toIndex(getPosX(), getPosY()) < 0) return;
@@ -291,8 +295,6 @@ public class MoveCaw implements UpdateEvent, Cloneable
           }
         }
       }
-
-      
       
       if(StartIdxHeavy.isEmpty()) {
         for(int i = 0; i < 4; i++) {
@@ -302,14 +304,16 @@ public class MoveCaw implements UpdateEvent, Cloneable
         }
       }
       
-      if(StartIdxHeavy.isEmpty()) return;
-      
-      int rnd = StartIdxHeavy.elementAt(rand.nextInt(StartIdxHeavy.size()));
-      move(vx[rnd], vy[rnd]);
-      setCharaDir(rnd);
-      log[mapData.toIndex(getPosX(), getPosY())] = now + 1;
+      if(!StartIdxHeavy.isEmpty()) {
+        int rnd = StartIdxHeavy.elementAt(rand.nextInt(StartIdxHeavy.size()));
+        move(vx[rnd], vy[rnd]);
+        setCharaDir(rnd);
+        log[mapData.toIndex(getPosX(), getPosY())] = now + 1;
+      }
 
-      //System.out.println(getPosX() + " " + getPosY());
+      if(itemController.isTrapPoint(getPosX(), getPosY())) {
+        setCharaDir(4);
+      }
       
       setValue(this);
       if(execute) new AIWorker(this.sleepTime).execute();

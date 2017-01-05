@@ -7,6 +7,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.fxml.FXMLLoader;
+import javafx.stage.WindowEvent;
 
 public class MapGame extends Application {
     Stage stage;
@@ -14,9 +15,13 @@ public class MapGame extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         stage = primaryStage;
+        stage.setOnCloseRequest((WindowEvent t) -> {
+            System.exit(0);
+          });
         primaryStage.setTitle("MAP GAME");
         Pane myPane_top = (Pane)FXMLLoader.load(getClass().getResource("MapGame.fxml"));
         Scene myScene = new Scene(myPane_top);
+        //myScene.getStylesheets().add("MapGame.css");
         primaryStage.setScene(myScene);
         primaryStage.show();
     }

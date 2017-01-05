@@ -102,12 +102,12 @@ public class ItemController implements Cloneable{
     private void initImage(){
         itemImage = new Image[5];
         trapImage = new Image[2];
-        itemImage[ITEM_NONE]   = new Image("image/ITEM_NONE.png");//仮
-        itemImage[ITEM_HAMMER] = new Image("image/HAMMER.png");//仮
-        itemImage[ITEM_BANANA] = new Image("image/BANANA.png");//仮
+        itemImage[ITEM_NONE]   = new Image("image/ITEM_NONE.jpg");
+        itemImage[ITEM_HAMMER] = new Image("image/HAMMER.png");
+        itemImage[ITEM_BANANA] = new Image("image/BANANA.png");
         itemImage[ITEM_ASIATO] = new Image("image/ITEM_ASIATO.png");//仮
         itemImage[ITEM_TIME] = new Image("image/TIME.png");//仮
-        trapImage[0] = new Image("image/BANANA_TRAP.png");//仮
+        trapImage[0] = new Image("image/BANANA_TRAP.png");
         trapImage[1] = new Image("image/ASIATO_TRAP.png");//仮
 
     }
