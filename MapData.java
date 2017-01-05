@@ -1,33 +1,94 @@
 import javafx.scene.image.Image;
-public class MapData {
-    public static final int TYPE_NONE   = 0;
-    public static final int TYPE_WALL   = 1;
-    public static final int TYPE_STONE  = 2;
-    public static final int TYPE_ITEM   = 3;
-    public static final int MAP_ITEM_NUM = 5;
-    public static int GOAL_X = 20;
+import java.util.Arrays;
+public class MapData implements Cloneable{
+    public static final int TYPE_DARK    = 0;
+    public static final int TYPE_NONE    = 1;
+    public static final int TYPE_WALL    = 2;
+    public static final int TYPE_STONE   = 3;
+    public static final int TYPE_KEYWORD = 4;
+    public static final int TYPE_ITEM    = 5;
+    public static final int TYPE_TRAP    = 6;
+    public static final int TYPE_ENEMY   = 7; 
+
+    private static final int BLOCK  = 0;
+    private static final int FLOWER = 1;
+    private static final int STAR   = 2;
+    private static final int CLOUD  = 3;
+
+    public static int GOAL_X = 19;
     public static int GOAL_Y = 13; 
-    public Image[] mapImage;
+    public Stone[] stone;
+    private Image[] mapImage;
+    private Image[] aroundRoadImage;
+    private int mapItemNum = 5;
+    private char[] keyWord;
     private int[] map;
-    private int[][] itemPlace;
     private int width;
     private int height;
-    private int itemPosX;
-    private int itemPosY;
-    private int item_cnt = 0;
 
     MapData(int x, int y){
-        mapImage = new Image[3];
+        mapImage = new Image[5];
+        aroundRoadImage = new Image[4];
+
+        aroundRoadImage[BLOCK] = new Image("image/WALL.png");
+        aroundRoadImage[FLOWER] = new Image("image/flower.png");
+        aroundRoadImage[STAR] = new Image("image/star.png");
+        aroundRoadImage[CLOUD] = new Image("image/cloud.png");
+
+        mapImage[TYPE_DARK] = new Image("image/BLACK.png");
         mapImage[TYPE_NONE] = new Image("image/SPACE.png");
-        mapImage[TYPE_WALL] = new Image("image/WALL.png");
-        mapImage[TYPE_STONE] = new Image("image/nekod1.png"); 
+        mapImage[TYPE_WALL] = aroundRoadImage[BLOCK];
+        mapImage[TYPE_STONE] = new Image("image/STONE.png"); 
+        mapImage[TYPE_KEYWORD] = new Image("image/TEST.png");
+
         width  = x;
         height = y;
         map = new int[y*x];
-        itemPlace = new int[MAP_ITEM_NUM][2]; // アイテム座標(x,y)をMAP_ITEM_NUM個格納する
         fillMap(MapData.TYPE_WALL);
         digMap(1, 3);
-        putItemMap(MAP_ITEM_NUM);
+        this.keyWord = ItemController.decideKeyWord().toCharArray();
+        stone = new Stone[keyWord.length+2];
+        putStoneMap(keyWord.length+2);
+        putItemMap(mapItemNum);
+        printMap();
+    }
+
+    //クローン生成
+    @Override
+    public MapData clone() throws CloneNotSupportedException{
+        MapData cloneMapData = null;
+        Stone[] cloneStone = new Stone[getStoneNum()];
+        try{
+            cloneMapData = (MapData)super.clone();
+            //ディープコピー
+            for(int i = 0;i < stone.length;i++){
+                cloneStone[i] = (Stone)stone[i].clone();
+            }
+            cloneMapData.map = map.clone();
+            cloneMapData.stone = cloneStone;
+        }catch(CloneNotSupportedException e){
+            e.printStackTrace();
+        }
+
+        return cloneMapData;
+    }
+
+    public int getStoneNum(){
+        int stoneNum = 0;
+        for(int i = 0;i < width*height;i++){
+            if(map[i] == TYPE_STONE){
+                stoneNum++;
+            }
+        }
+        return stoneNum;
+    }
+
+    public int getMapItemNum(){
+        return mapItemNum;
+    }
+
+    public String getKeyWord(){
+        return String.valueOf(keyWord);
     }
 
     public int getHeight(){
@@ -38,47 +99,25 @@ public class MapData {
         return width;
     }
 
-    public int getItemPosX(){
-        return itemPosX;
-    } 
-
-    public int getItemPosY(){
-        return itemPosY;
-    } 
-
-    //choseItemPos
-    //parameter 
-    //  int itemPoint : アイテムを置くポイント
-    //アイテムを置くポイントをmapdataのTYPE_ITEMの位置の中でランダムで決める
-    //
-    public void choseItemPos(){
-        int itemPoint = (int)(Math.random()*MAP_ITEM_NUM);
-        itemPosX = itemPlace[itemPoint][0];
-        itemPosY = itemPlace[itemPoint][1];
-    }
-
     public int toIndex(int x, int y){
         return x + y * width;
     }
 
-    //getImageメソッド
-    //return : Image
-    //指定された座標のイメージを返す
-    //
-    public Image getImage(int x, int y) {
-        return mapImage[getMap(x,y)];
-    }
-
     //getMapメソッド
-    //parameter : int,int
-    //return    : int
-    //指定された座標をもとにmapImageのインデックスを割り出す
+    //
+    //  parameter
+    //   int x,y : 座標
+    //  return    
+    //   int     : MapDataのTYPE_〜の値
+    //
+    //  指定された座標にあるオブジェクト情報を取得
+    //  0 = NONE,1 = WALL,2 = STONE,3 = ITEM
     //
     public int getMap(int x, int y) {
         if (x < 0 || width <= x || y < 0 || height <= y) {
             return -1;
         }
-        return map[toIndex(x,y)]; 
+        return map[toIndex(x,y)];
     }
 
     //setMapメソッド
@@ -93,29 +132,21 @@ public class MapData {
         map[toIndex(x,y)] = type;
     }
 
-    //saveItemPlaceメソッド
-    //parameter
-    //  int,int : アイテムが設置されている座標 
-    //アイテムが設置されている座標を保存する
+    //getImageメソッド
+    //  return : Image
     //
-    private void saveItemPlace(int x, int y){
-        itemPlace[item_cnt][0] = x;
-        itemPlace[item_cnt][1] = y;
-        item_cnt++;
+    //  指定された座標のイメージを返す
+    //
+    public Image getImage(int x, int y) {
+        return mapImage[getMap(x,y)];
     }
-
-    //canPutItemメソッド
-    //paramter 
-    //  候補点
-    //return
-    //  候補点にアイテムを置けるならtrueを返す
-    //  
-    private boolean canPutItem(int x, int y){
-        if(getMap(x, y) == MapData.TYPE_NONE){
-            return true;
-        }else{
-            return false;
-        }
+    
+    //getImageメソッド(オーバーロード)
+    //  int mapDataType : マップに置かれてるオブジェクトの種類
+    //  return : Image
+    //
+    public Image getImage(int mapDataType) {
+        return mapImage[mapDataType];
     }
 
     //fillMapメソッド
@@ -131,6 +162,7 @@ public class MapData {
             }
         }
     }
+
 
     //digMapメソッド
     //parameter : int ,int
@@ -161,9 +193,36 @@ public class MapData {
         }
     }
 
+    //putStoneMapメソッド
+    //parameter 
+    //  int stoneNum  : このMapに置く岩の数
+    //
+    //マップ構造に岩を組み込む
+    //
+    private void putStoneMap(int stoneNum){
+        int x,y;
+        int cnt = 0;
+
+        while(cnt < stoneNum){
+            x = (int)(Math.random()*width);
+            y = (int)(Math.random()*height);
+            if(canPutObject(x,y,TYPE_STONE)){
+                setMap(x, y, TYPE_STONE); 
+                if(cnt < keyWord.length){
+                    stone[cnt] = new Stone(x,y,keyWord[cnt]);// keyWordの1文字を関連付ける
+                }else {
+                    stone[cnt] = new Stone(x,y);//keyWordを関連付けない
+                }
+                cnt++;
+            }
+        }
+    }
+
     //putItemMapメソッド
     //parameter 
-    //  int itemNum : このMapに置くアイテムの個数
+    //  int itemNum  : このMapにアイテムの数
+    //
+    //マップ構造にアイテムを組み込む
     //
     private void putItemMap(int itemNum){
         int x,y;
@@ -171,28 +230,78 @@ public class MapData {
         while(cnt < itemNum){
             x = (int)(Math.random()*width);
             y = (int)(Math.random()*height);
-            if(canPutItem(x,y)){
-                setMap(x,y,MapData.TYPE_ITEM);
-                saveItemPlace(x,y);
+            if(canPutObject(x,y,TYPE_ITEM)){
+                setMap(x, y, TYPE_ITEM);
                 cnt++;
             }
         }
-        for(int i = 0;i < 5;i++){
-            for(int j = 0;j < 2;j++){
-                System.out.print(itemPlace[i][j]+",");
+    }
+
+    //canPutObjectメソッド
+    //paramter 
+    //  int x,y : 候補点
+    //  int objeType : アイテム/岩/トラップ/牛
+    //return
+    //  候補点にアイテム/岩/トラップ/牛を設置可ならtrueを返す
+    //  
+    public boolean canPutObject(int x, int y, int objeType){
+        if(getMap(x, y) == MapData.TYPE_NONE){
+            if(x == 1  && y == 1){
+                //(1,1)のスタート地点はトラップのみ設置できる
+                if(objeType == TYPE_TRAP){
+                    return true;
+                }else{
+                    return false;
+                }
+            }else{
+                return true;
             }
-            System.out.println("");
+        }else{
+            return false;
         }
     }
 
-    //reachGoalメソッド
-    //prameter 
-    //  int,int : キャラクターの進むであろう座標
-    //return 
-    //  boolean : ゴールポイント(壁)ならtrueを返す
+    //toStoneIndexメソッド
+    //  parameter 
+    //    int x,y : 攻撃している岩の座標
+    //  return 
+    //    int : この座標を持つ岩の配列上のインデックス
     //  
-    public boolean reachGoal(int x, int y){
-        if(x == GOAL_X  && y == GOAL_Y)return true;
-        else return false;
+    //  自分が破壊しようとしている岩の座標をstone[]のインデックスに対応付ける
+    //
+    public int toStoneIndex(int x, int y){
+        int stoneIndex = 0;
+        for(int i = 0;i < stone.length;i++){
+            if(stone[i].getPosX() == x  &&  stone[i].getPosY() == y){
+                stoneIndex = i;
+            }
+        }
+        return stoneIndex;
+    }
+
+    //テスト用
+    public void printMap(){
+        for (int y=0; y<height; y++){
+            for (int x=0; x<width; x++){
+                System.out.print(map[toIndex(x,y)]+" ");
+            }
+            System.out.print("\n");
+        }
+    }
+
+    public void func1(){
+        mapImage[TYPE_WALL] = aroundRoadImage[BLOCK];
+    }
+    
+    public void func2(){
+        mapImage[TYPE_WALL] = aroundRoadImage[FLOWER];
+    }
+
+    public void func3(){
+        mapImage[TYPE_WALL] = aroundRoadImage[STAR]; 
+    }
+
+    public void func4(){
+        mapImage[TYPE_WALL] = aroundRoadImage[CLOUD]; 
     }
 }
