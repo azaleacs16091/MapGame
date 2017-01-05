@@ -1,0 +1,25 @@
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.input.*?>
+<?import javafx.scene.image.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="MapGameController" prefWidth="200" prefHeight="200">
+  <padding>
+    <Insets top="10" right="10" bottom="10" left="10"/>
+  </padding>
+  <children>
+    <HBox>
+      <children>
+        <TextField fx:id="passField" promptText="input"/>
+        <Button text="決定" onAction="#decideButtonAction"/>
+      </children>
+    </HBox>
+    <HBox>
+      <children>
+        <ImageView fx:id="judgeImageView" fitWidth="160" fitHeight="160"></ImageView>
+      </children>
+    </HBox>
+  </children>
+</VBox>

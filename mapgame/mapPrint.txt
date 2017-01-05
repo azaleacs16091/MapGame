@@ -1,0 +1,48 @@
+
+    //mapPrintメソッド(オーバーロード)
+    //parameter
+    //  MoveCaw e   : 操作するキャラクター
+    //  MapData m     : マップデータ
+    //
+    //敵とその一歩前の位置だけにイメージをセットする
+    //
+    public void mapPrint(MoveCaw e){
+        int[] cawLogPos;
+        int index;
+        int behindPosX,behindPosY;
+
+        if(canReachLight(e.getPosX(),e.getPosY())){
+
+            //charaのイメージをセット
+            index = e.getPosY()*mapData.getWidth() + e.getPosX();
+            mapImageView[index].setImage(e.getImage());
+
+            //charaの一歩前のイメージをセット
+            cawLogPos = e.getOneStepLog();
+            behindPosX = cawLogPos[0];
+            behindPosY = cawLogPos[1];
+            index = behindPosY*mapData.getWidth() + behindPosX;
+            if(mapData.getMap(behindPosX,behindPosY) == MapData.TYPE_ITEM){
+                mapImageView[index].setImage(itemController.getItemImage(behindPosX,behindPosY));
+            }else{
+                mapImageView[index].setImage(mapData.getImage(behindPosX,behindPosY));
+            }
+            appear = true;
+        }else{
+            if(appear){
+                //charaの一歩前のイメージをセット
+                cawLogPos = e.getOneStepLog();
+                behindPosX = cawLogPos[0];
+                behindPosY = cawLogPos[1];
+                index = behindPosY*mapData.getWidth() + behindPosX;
+                if(mapData.getMap(behindPosX,behindPosY) == MapData.TYPE_ITEM){
+                    mapImageView[index].setImage(itemController.getItemImage(behindPosX,behindPosY));
+                }else{
+                    mapImageView[index].setImage(mapData.getImage(behindPosX,behindPosY));
+                }
+                appear = false;
+            }
+        }
+    }
+
+
